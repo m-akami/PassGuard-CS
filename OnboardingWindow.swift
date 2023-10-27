@@ -89,7 +89,7 @@ struct OnboardingWindow: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 0)
                 .onChange(of: masterPassword) { masterPassword in
-                    strengthColour = updateStrength(masterPassword)
+                    strengthColour = PasswordComplexityColour(masterPassword)
                 }
             
             // Inputs - Strength Meter
@@ -168,27 +168,6 @@ struct OnboardingWindow: View {
     
     /* Local Algorithms
      This part of the application contains algorithms that control the functions of just this window*/
-    
-    // Local Algorithms - Strength Meter Logic
-    
-    func updateStrength(_ masterPassword: String) -> Color {
-        let score = PasswordComplexity(masterPassword)
-        
-        switch score {
-        case 1:
-            return Color.red
-        case 2:
-            return Color.orange
-        case 3:
-            return Color.yellow
-        case 4:
-            return Color.green
-        case 5:
-            return Color.blue
-        default:
-            return Color.gray
-        }
-    }
     
     // Local Algorithms - Passwords Matching Logic
     
