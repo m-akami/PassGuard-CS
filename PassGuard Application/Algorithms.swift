@@ -87,7 +87,140 @@ func PassHash(_ input: String) -> UInt32 {
         let shift4 = 7 * (hash & 0x7F)
         let shift5 = 11 * (hash & 0xFF)
 
-        // This part of the logic has multiple different operations based on what the hash is, which means different hash values will undergo different shifting. This makes the ONE-WAY logic of the hashing more secure.
+        // This part of the logic has multiple different operations based on what the hash is, which means different hash values will undergo different shifting. This makes the ONE-WAY logic of the hashing more secure. I've split the possible 2^32 range of the hash values in 32 bits into 10 groups. Depending which group the data falls into, a different combination of mathematics will be applied. I have then randomly arranged the different mathematical hashes from each of the ten combinations (with no logic whatsoever) to create a somewhat secure hash function. Each of the ten blocks have four mathmatical functions to hash the data.
+        
+        if hash >= 0x0 && hash <= 0x19999999 {
+            // This part left-shifts the bits by shift1, XORs and then right-shifts the bits by shift2
+            hash = (hash << shift1) ^ (hash >> shift2)
+            
+            // This part left shifts the hash by shift1, then XORs it with the NOT result of the right shift by shift2
+            hash = (hash << shift1) ^ ~(hash >> shift2)
+            
+            // This part left-shifts by shift1, then adds it to the left-shift by shift2, then ANDs the result with the left shift of shift3
+            hash = (hash << shift1) + (hash << shift2) & (hash << shift3)
+            
+            // This part left shifts the hash by shift1, XORs the result by the right shift of shift2, then multiplies it by the left shift of the hash by shift3
+            hash = (hash << shift1) ^ (hash >> shift2) * (hash << shift3)
+        }
+        else if hash >= 0x19999999 && hash <= 0x33333332 {
+            // This part left-shifts the bits by shift1, adds then right-shifts by shift2, then subtracts the left shift of the hash by shift three
+            hash = (hash << shift1) + (hash >> shift2) - (hash << shift3)
+            
+            // This part left-shifts the hash by shift1, then multiplies it with the right shift by shift2. Because of the mathematical order of execution, the left-shift by shift3 is finally added
+            hash = (hash << shift1) * (hash >> shift2) + (hash << shift3)
+            
+            // This part left-shifts by shift1, then adds it to the left-shift by shift2, then ANDs the result with the left shift of shift3
+            hash = (hash << shift1) + (hash << shift2) & (hash << shift3)
+            
+            // This part left shifts the hash by shift1, XORs the result by the right shift of shift2, then multiplies it by the left shift of the hash by shift3
+            hash = (hash << shift1) ^ (hash >> shift2) * (hash << shift3)
+        }
+        else if hash >= 0x33333332 && hash <= 0x4CCCCCCB {
+            // This part left-shifts the bits by shift1, then uses an AND gate with the right shift of the hash, then combines it with an OR of the left-shift of shift3, then XORs it with the right-shift of the hash by shift4
+            hash = (hash << shift1) & (hash >> shift2) | (hash << shift3) ^ (hash >> shift4)
+            
+            // This part left shifts the hash by shift1, XORs the result by the right shift of shift2, then multiplies it by the left shift of the hash by shift3
+            hash = (hash << shift1) ^ (hash >> shift2) * (hash << shift3)
+            
+            // This part left shifts the hash by shift1, XORs the result by the right shift of shift2, then multiplies it by the left shift of the hash by shift3
+            hash = (hash << shift1) ^ (hash >> shift2) * (hash << shift3)
+            
+            // This part left shifts the hash by shift1, then XORs it with the NOT result of the right shift by shift2
+            hash = (hash << shift1) ^ ~(hash >> shift2)
+        }
+        else if hash >= 0x4CCCCCCB && hash <= 0x66666664 {
+            // This part left shifts the hash by shift1, then XORs it with the NOT result of the right shift by shift2
+            hash = (hash << shift1) ^ ~(hash >> shift2)
+            
+            // This part left-shifts the hash by shift1, then multiplies it with the right shift by shift2. Because of the mathematical order of execution, the left-shift by shift3 is finally added
+            hash = (hash << shift1) * (hash >> shift2) + (hash << shift3)
+            
+            // This part left-shifts the bits by shift1, then uses an AND gate with the right shift of the hash, then combines it with an OR of the left-shift of shift3, then XORs it with the right-shift of the hash by shift4
+            hash = (hash << shift1) & (hash >> shift2) | (hash << shift3) ^ (hash >> shift4)
+            
+            // This part left shifts the hash by shift1, XORs the result by the right shift of shift2, then multiplies it by the left shift of the hash by shift3
+            hash = (hash << shift1) ^ (hash >> shift2) * (hash << shift3)
+        }
+        else if hash >= 0x66666664 && hash <= 0x7FFFFFFD {
+            // This part left-shifts the hash by shift1, then multiplies it with the right shift by shift2. Because of the mathematical order of execution, the left-shift by shift3 is finally added
+            hash = (hash << shift1) * (hash >> shift2) + (hash << shift3)
+            
+            // This part left-shifts the hash by shift1, then multiplies it with the right shift by shift2. Because of the mathematical order of execution, the left-shift by shift3 is finally added
+            hash = (hash << shift1) * (hash >> shift2) + (hash << shift3)
+            
+            // This part left-shifts by shift1, then adds it to the left-shift by shift2, then ANDs the result with the left shift of shift3
+            hash = (hash << shift1) + (hash << shift2) & (hash << shift3)
+            
+            // This part left-shifts by shift1, then adds it to the left-shift by shift2, then ANDs the result with the left shift of shift3
+            hash = (hash << shift1) + (hash << shift2) & (hash << shift3)
+        }
+        else if hash >= 0x7FFFFFFD && hash <= 0x99999996 {
+            // This part left-shifts by shift1, then uses an OR gate with the right shift with shift2, then uses an XOR with the left shift of shift3
+            hash = (hash << shift1) | (hash >> shift2) ^ (hash << shift3)
+            
+            // This part left-shifts by shift1, ORs the result by the right-shift of the hash by shift2, then adds the result with the left shift by shift3
+            hash = (hash << shift1) | (hash >> shift2) + (hash << shift3)
+            
+            // This part left-shifts by shift1, then adds it to the left-shift by shift2, then ANDs the result with the left shift of shift3
+            hash = (hash << shift1) + (hash << shift2) & (hash << shift3)
+            
+            // This part left-shifts the hash by shift1, ANDs the result by the left shift by shift2, then adds it with the rightshift by shift3
+            hash = (hash << shift1) & (hash << shift2) + (hash >> shift3)
+        }
+        else if hash >= 0x99999996 && hash <= 0xB333332F {
+            // This part left-shifts by shift1, then adds it to the left-shift by shift2, then ANDs the result with the left shift of shift3
+            hash = (hash << shift1) + (hash << shift2) & (hash << shift3)
+            
+            // This part left-shifts by shift1, ORs the result by the right-shift of the hash by shift2, then adds the result with the left shift by shift3
+            hash = (hash << shift1) | (hash >> shift2) + (hash << shift3)
+            
+            // This part left-shifts by shift1, then uses an OR gate with the right shift with shift2, then uses an XOR with the left shift of shift3
+            hash = (hash << shift1) | (hash >> shift2) ^ (hash << shift3)
+            
+            // This part left shifts the hash by shift1, XORs the result by the right shift of shift2, then multiplies it by the left shift of the hash by shift3
+            hash = (hash << shift1) ^ (hash >> shift2) * (hash << shift3)
+        }
+        else if hash >= 0xB333332F && hash <= 0xCCCCCCC8 {
+            // This part left-shifts by shift1, ORs the result by the right-shift of the hash by shift2, then adds the result with the left shift by shift3
+            hash = (hash << shift1) | (hash >> shift2) + (hash << shift3)
+            
+            // This part left-shifts the bits by shift1, then uses an AND gate with the right shift of the hash, then combines it with an OR of the left-shift of shift3, then XORs it with the right-shift of the hash by shift4
+            hash = (hash << shift1) & (hash >> shift2) | (hash << shift3) ^ (hash >> shift4)
+            
+            // This part left shifts the hash by shift1, XORs the result by the right shift of shift2, then multiplies it by the left shift of the hash by shift3
+            hash = (hash << shift1) ^ (hash >> shift2) * (hash << shift3)
+            
+            // This part left shifts the hash by shift1, XORs the result by the right shift of shift2, then multiplies it by the left shift of the hash by shift3
+            hash = (hash << shift1) ^ (hash >> shift2) * (hash << shift3)
+        }
+        else if hash >= 0xCCCCCCC8 && hash <= 0x6666661 {
+            // This part left shifts the hash by shift1, XORs the result by the right shift of shift2, then multiplies it by the left shift of the hash by shift3
+            hash = (hash << shift1) ^ (hash >> shift2) * (hash << shift3)
+            
+            // This part left-shifts the hash by shift1, ANDs the result by the left shift by shift2, then adds it with the rightshift by shift3
+            hash = (hash << shift1) & (hash << shift2) + (hash >> shift3)
+            
+            // This part left-shifts the hash by shift1, then multiplies it with the right shift by shift2. Because of the mathematical order of execution, the left-shift by shift3 is finally added
+            hash = (hash << shift1) * (hash >> shift2) + (hash << shift3)
+            
+            // This part left-shifts the bits by shift1, then uses an AND gate with the right shift of the hash, then combines it with an OR of the left-shift of shift3, then XORs it with the right-shift of the hash by shift4
+            hash = (hash << shift1) & (hash >> shift2) | (hash << shift3) ^ (hash >> shift4)
+        }
+        else if hash >= 0x6666661 && hash <= 0xFFFFFFFF {
+            // This part left-shifts the hash by shift1, ANDs the result by the left shift by shift2, then adds it with the rightshift by shift3
+            hash = (hash << shift1) & (hash << shift2) + (hash >> shift3)
+            
+            // This part left-shifts by shift1, ORs the result by the right-shift of the hash by shift2, then adds the result with the left shift by shift3
+            hash = (hash << shift1) | (hash >> shift2) + (hash << shift3)
+            
+            // This part left-shifts the bits by shift1, then uses an AND gate with the right shift of the hash, then combines it with an OR of the left-shift of shift3, then XORs it with the right-shift of the hash by shift4
+            hash = (hash << shift1) & (hash >> shift2) | (hash << shift3) ^ (hash >> shift4)
+            
+            // This part left-shifts by shift1, ORs the result by the right-shift of the hash by shift2, then adds the result with the left shift by shift3
+            hash = (hash << shift1) | (hash >> shift2) + (hash << shift3)
+        }
+        
+        // This part applies to all hash values, further complicating the process.
         
         // This part left-shifts the bits by shift one, and then right-shifts the bits by shift two, then an AND operator is used with overflow protection.
         hash = (hash << shift1) &+ (hash >> shift2)
