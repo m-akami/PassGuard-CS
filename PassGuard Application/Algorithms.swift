@@ -97,20 +97,20 @@ func PassHash(_ input: String) -> UInt32 {
             hash = (hash << shift1) ^ ~(hash >> shift2)
             
             // This part left-shifts by shift1, then adds it to the left-shift by shift2, then ANDs the result with the left shift of shift3
-            hash = (hash << shift1) + (hash << shift2) & (hash << shift3)
+            hash = (hash << shift1) &+ (hash << shift2) & (hash << shift3)
             
             // This part left shifts the hash by shift1, XORs the result by the right shift of shift2, then multiplies it by the left shift of the hash by shift3
-            hash = (hash << shift1) ^ (hash >> shift2) * (hash << shift3)
+            hash = (hash << shift1) ^ (hash >> shift2) &* (hash << shift3)
         }
         else if hash >= 0x19999999 && hash <= 0x33333332 {
             // This part left-shifts the bits by shift1, adds then right-shifts by shift2, then subtracts the left shift of the hash by shift three
-            hash = (hash << shift1) + (hash >> shift2) - (hash << shift3)
+            hash = (hash << shift1) &+ (hash >> shift2) - (hash << shift3)
             
             // This part left-shifts the hash by shift1, then multiplies it with the right shift by shift2. Because of the mathematical order of execution, the left-shift by shift3 is finally added
-            hash = (hash << shift1) * (hash >> shift2) + (hash << shift3)
+            hash = (hash << shift1) &* (hash >> shift2) &+ (hash << shift3)
             
             // This part left-shifts by shift1, then adds it to the left-shift by shift2, then ANDs the result with the left shift of shift3
-            hash = (hash << shift1) + (hash << shift2) & (hash << shift3)
+            hash = (hash << shift1) &+ (hash << shift2) & (hash << shift3)
             
             // This part left shifts the hash by shift1, XORs the result by the right shift of shift2, then multiplies it by the left shift of the hash by shift3
             hash = (hash << shift1) ^ (hash >> shift2) * (hash << shift3)
@@ -208,35 +208,41 @@ func PassHash(_ input: String) -> UInt32 {
         }
         else if hash >= 0x6666661 && hash <= 0xFFFFFFFF {
             // This part left-shifts the hash by shift1, ANDs the result by the left shift by shift2, then adds it with the rightshift by shift3
-            hash = (hash << shift1) & (hash << shift2) + (hash >> shift3)
+            hash = (hash << shift1) & (hash << shift2) &+ (hash >> shift3)
             
             // This part left-shifts by shift1, ORs the result by the right-shift of the hash by shift2, then adds the result with the left shift by shift3
-            hash = (hash << shift1) | (hash >> shift2) + (hash << shift3)
+            hash = (hash << shift1) | (hash >> shift2) &+ (hash << shift3)
             
             // This part left-shifts the bits by shift1, then uses an AND gate with the right shift of the hash, then combines it with an OR of the left-shift of shift3, then XORs it with the right-shift of the hash by shift4
             hash = (hash << shift1) & (hash >> shift2) | (hash << shift3) ^ (hash >> shift4)
             
             // This part left-shifts by shift1, ORs the result by the right-shift of the hash by shift2, then adds the result with the left shift by shift3
-            hash = (hash << shift1) | (hash >> shift2) + (hash << shift3)
+            hash = (hash << shift1) | (hash >> shift2) &+ (hash << shift3)
         }
         
         // This part applies to all hash values, further complicating the process.
         
         // This part left-shifts the bits by shift one, and then right-shifts the bits by shift two, then an AND operator is used with overflow protection.
         hash = (hash << shift1) &+ (hash >> shift2)
+        
         // This part XORs it with the 1st prime number, then multiplies by the second.
         hash = (hash ^ prime1) &* prime2
+        
         // Then this part XORs it with the third prime number and subtracts the fourth.
         hash = (hash ^ prime3) &- prime4
+        
         // The fifth prime number is added then the input is combined with the current character value in 32 bits.
         hash = (hash + prime5) &+ UInt32(char)
+        
         // Then left-shifts are executed by shift3, shift4, and shift5 and then they are combined with the hash.
         hash = (hash << shift3) &+ (hash << shift4) &- (hash << shift5)
     }
-
-    // The hash gets outputted.
+    
+    // The hash gets outputted as a numerical value.
     return hash
 }
 
 /* PassGuard Encrypt - PassCrypt
 A proof-of-concept encryption algorithm designed to obfuscate data stored in the master table.*/
+
+
