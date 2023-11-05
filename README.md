@@ -22,7 +22,7 @@ While PassGuard-CS is a functional prototype, you must acknowledge its limitatio
 ## Project Purpose
 The primary purpose of PassGuard-CS is to serve as a practical assignment for educational purposes. I have tried to include multiple concepts in this app, and have open-sourced it as others may be able to learn from it. I have used the following concepts in this project:
 - User Interface Design with SwiftUI
-- Data Storage and Retrieval with SwiftData
+- Data Storage and Retrieval with SQLite and SwiftData for secret management
 - Password Strength Evaluation
 - Basic Encryption Principles
 - Error Handling and Validation
