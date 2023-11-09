@@ -245,4 +245,50 @@ func PassHash(_ input: String) -> UInt32 {
 /* PassGuard Encrypt - PassCrypt
 A proof-of-concept encryption algorithm designed to obfuscate data stored in the master table.*/
 
+/* Comprimised Account Notifications - SecurityCheck
+An algorithm powered by the HIBP API to return the sites which have the breached account in*/
 
+func SecurityCheck(account: String, siteName: String, apiKey: String) -> Bool {
+    
+    let apiRequest = "https://haveibeenpwned.com/api/v3/breachedaccount/\(account)"
+    var isBreachDetected = false
+    
+    // This allows Swift Concurrency to be used, which prevents the UI from hanging while this request is processing, as the time taken to complete this request is dependant on the network speeds
+    let semaphore = DispatchSemaphore(value: 0)
+
+    // This sets the URL to request content from to the API Request formed with the user's account
+    if let url = URL(string: apiRequest) {
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue(apiKey, forHTTPHeaderField: "hibp-api-key")
+        
+        // This starts an asynchronous Swift Task
+        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+            if let data = data {
+                do {
+                    
+                    // This parses the request data recieved from HIBP's database
+                    if let breaches = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: String]] {
+                        for breach in breaches {
+                            if let name = breach["Name"], name == siteName {
+                                
+                                // If the siteName is included in the JSON output, then the breach will be marked as detected
+                                isBreachDetected = true
+                                break
+                            }
+                        }
+                    }
+                } catch {
+                    // If there are issues with parsing data, it will cause an internal API error
+                    print("API error")
+                }
+            }
+            
+            semaphore.signal()
+        }
+        task.resume()
+    }
+
+    semaphore.wait()
+    return isBreachDetected
+}
