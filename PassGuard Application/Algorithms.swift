@@ -248,47 +248,73 @@ A proof-of-concept encryption algorithm designed to obfuscate data stored in the
 /* Comprimised Account Notifications - SecurityCheck
 An algorithm powered by the HIBP API to return the sites which have the breached account in*/
 
-func SecurityCheck(account: String, siteName: String, apiKey: String) -> Bool {
+func SecurityCheck(account: String, siteName: String, apiKey: String) -> (Int, String) {
     
-    let apiRequest = "https://haveibeenpwned.com/api/v3/breachedaccount/\(account)"
+    // This section declares variables which will be used throught the function.
+    let apiUrl = "https://haveibeenpwned.com/api/v3/breachedaccount/\(account)?truncateResponse=false"
     var isBreachDetected = false
-    
-    // This allows Swift Concurrency to be used, which prevents the UI from hanging while this request is processing, as the time taken to complete this request is dependant on the network speeds
+    var breachDescription = ""
     let semaphore = DispatchSemaphore(value: 0)
-
-    // This sets the URL to request content from to the API Request formed with the user's account
-    if let url = URL(string: apiRequest) {
+    
+    // The SecurityCheck function will give a returnCode 1 if another failure occured, a returnCode 2 if the API can't authenticate, a returnCode of 3 if a breach was located and a returnCode of 4 if the account is secure.
+    var returnCode = 0
+    
+    // The API Rqeuest that was formed with the user's account will be used here to open a HTTP connection
+    if let url = URL(string: apiUrl) {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
+        
+        // The API key will be sent in the relevant header
         request.setValue(apiKey, forHTTPHeaderField: "hibp-api-key")
         
-        // This starts an asynchronous Swift Task
+        // This part of the logic will parse the JSON response from the HIBP API
         let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let data = data {
                 do {
-                    
-                    // This parses the request data recieved from HIBP's database
-                    if let breaches = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: String]] {
+                    if let breaches = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] {
                         for breach in breaches {
-                            if let name = breach["Name"], name == siteName {
-                                
-                                // If the siteName is included in the JSON output, then the breach will be marked as detected
+                            
+                            // If the Name response from the API matches the siteName passed through, then a breach will be marked as detected
+                            if let name = breach["Name"] as? String, name == siteName {
                                 isBreachDetected = true
+                                
+                                // The returnCode will be set to 3 to match this change, and the description will be located and passed through
+                                returnCode = 3
+                                if let description = breach["Description"] as? String {
+                                    breachDescription = description
+                                }
                                 break
                             }
                         }
                     }
                 } catch {
-                    // If there are issues with parsing data, it will cause an internal API error
-                    print("API error")
+                    
+                    // This part of the logic covers an unknown error in the API handling, or if the device is offline
+                    returnCode = 1
                 }
+            } else {
+                
+                // This part of the logic covers an error in the API's authentication
+                returnCode = 2
             }
-            
             semaphore.signal()
         }
         task.resume()
+    } else {
+        
+        // If it can't get the URL, the semaphore sends a signal to continue the task
+        semaphore.signal()
     }
 
     semaphore.wait()
-    return isBreachDetected
+    
+    // This will remove HTML features from the returned breachDescription using regex
+    breachDescription = breachDescription.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression, range: nil)
+    
+    // This will check if the account is secure (returnCode = 4) only if no breach was detected
+    if !isBreachDetected {
+        returnCode = 4
+    }
+    
+    return (returnCode, breachDescription)
 }
