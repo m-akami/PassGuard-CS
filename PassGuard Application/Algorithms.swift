@@ -318,3 +318,51 @@ func SecurityCheck(account: String, siteName: String, apiKey: String) -> (Int, S
     
     return (returnCode, breachDescription)
 }
+
+/* Secure Password Generation - PasswordGenerator
+An algorithm that can create passwords, with a random character set, a word dictionary, or a letter only system. If the Type is 1, the word generation system is used. If the Type is 2 the character generation system is used, and if the Type is 3 the character generation system is used, but special characters are excluded.*/
+
+func PasswordGenerator(Type: Int, Complexity: Int) -> String {
+    
+    // This section declares the Password string
+    var password = ""
+    
+    // This section is the array of random words to use when generating a password
+    let wordDictionary = ["apple", "banana", "chocolate", "dolphin", "elephant", "firefly", "giraffe", "happiness", "icecream", "jazz"]
+
+    // This chooses a random word from the dictionary
+    func PasswordGeneratorGenerateWord() -> String {
+        let randomIndex = Int(arc4random_uniform(UInt32(wordDictionary.count)))
+        return wordDictionary[randomIndex]
+    }
+
+    // This chooses a random character in the string
+    func PasswordGeneratorGenerateCharacter() -> Character {
+        let characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        let randomIndex = Int(arc4random_uniform(UInt32(characters.count)))
+        return characters[characters.index(characters.startIndex, offsetBy: randomIndex)]
+    }
+
+    if Type == 1 {
+        
+        // This section of the logic generates words, and concatenates them with a dash to seperate them
+        for _ in 1...Complexity {
+            password += PasswordGeneratorGenerateWord() + "-"
+        }
+        
+        // The extra dash added to the last word is removed here
+        password = String(password.dropLast())
+        
+    } else if Type == 2 || Type == 3 {
+        
+        // If the selected option is Type 3 which includes special characters, then the random selection will include special characters
+        let charactersToUse = (Type == 3) ? "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" : "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-=_+[]{}|;:'\",.<>/?"
+        
+        // This part will make sure that an extra random selection is added until it reaches the length passed through as Complexity
+        for _ in 1...Complexity {
+            password.append(PasswordGeneratorGenerateCharacter())
+        }
+    }
+
+    return password
+}
