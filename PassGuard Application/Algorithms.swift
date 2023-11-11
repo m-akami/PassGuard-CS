@@ -134,7 +134,7 @@ func PassHash(_ input: String) -> UInt32 {
             hash = (hash << shift1) ^ ~(hash >> shift2)
             
             // This part left-shifts the hash by shift1, then multiplies it with the right shift by shift2. Because of the mathematical order of execution, the left-shift by shift3 is finally added
-            hash = (hash << shift1) * (hash >> shift2) + (hash << shift3)
+            hash = (hash << shift1) &* (hash >> shift2) + (hash << shift3)
             
             // This part left-shifts the bits by shift1, then uses an AND gate with the right shift of the hash, then combines it with an OR of the left-shift of shift3, then XORs it with the right-shift of the hash by shift4
             hash = (hash << shift1) & (hash >> shift2) | (hash << shift3) ^ (hash >> shift4)
@@ -144,16 +144,16 @@ func PassHash(_ input: String) -> UInt32 {
         }
         else if hash >= 0x66666664 && hash <= 0x7FFFFFFD {
             // This part left-shifts the hash by shift1, then multiplies it with the right shift by shift2. Because of the mathematical order of execution, the left-shift by shift3 is finally added
-            hash = (hash << shift1) * (hash >> shift2) + (hash << shift3)
+            hash = (hash << shift1) &* (hash >> shift2) + (hash << shift3)
             
             // This part left-shifts the hash by shift1, then multiplies it with the right shift by shift2. Because of the mathematical order of execution, the left-shift by shift3 is finally added
-            hash = (hash << shift1) * (hash >> shift2) + (hash << shift3)
+            hash = (hash << shift1) &* (hash >> shift2) + (hash << shift3)
             
             // This part left-shifts by shift1, then adds it to the left-shift by shift2, then ANDs the result with the left shift of shift3
-            hash = (hash << shift1) + (hash << shift2) & (hash << shift3)
+            hash = (hash << shift1) &+ (hash << shift2) & (hash << shift3)
             
             // This part left-shifts by shift1, then adds it to the left-shift by shift2, then ANDs the result with the left shift of shift3
-            hash = (hash << shift1) + (hash << shift2) & (hash << shift3)
+            hash = (hash << shift1) &+ (hash << shift2) & (hash << shift3)
         }
         else if hash >= 0x7FFFFFFD && hash <= 0x99999996 {
             // This part left-shifts by shift1, then uses an OR gate with the right shift with shift2, then uses an XOR with the left shift of shift3
@@ -163,14 +163,14 @@ func PassHash(_ input: String) -> UInt32 {
             hash = (hash << shift1) | (hash >> shift2) + (hash << shift3)
             
             // This part left-shifts by shift1, then adds it to the left-shift by shift2, then ANDs the result with the left shift of shift3
-            hash = (hash << shift1) + (hash << shift2) & (hash << shift3)
+            hash = (hash << shift1) &+ (hash << shift2) & (hash << shift3)
             
             // This part left-shifts the hash by shift1, ANDs the result by the left shift by shift2, then adds it with the rightshift by shift3
             hash = (hash << shift1) & (hash << shift2) + (hash >> shift3)
         }
         else if hash >= 0x99999996 && hash <= 0xB333332F {
             // This part left-shifts by shift1, then adds it to the left-shift by shift2, then ANDs the result with the left shift of shift3
-            hash = (hash << shift1) + (hash << shift2) & (hash << shift3)
+            hash = (hash << shift1) &+ (hash << shift2) & (hash << shift3)
             
             // This part left-shifts by shift1, ORs the result by the right-shift of the hash by shift2, then adds the result with the left shift by shift3
             hash = (hash << shift1) | (hash >> shift2) + (hash << shift3)
@@ -183,16 +183,16 @@ func PassHash(_ input: String) -> UInt32 {
         }
         else if hash >= 0xB333332F && hash <= 0xCCCCCCC8 {
             // This part left-shifts by shift1, ORs the result by the right-shift of the hash by shift2, then adds the result with the left shift by shift3
-            hash = (hash << shift1) | (hash >> shift2) + (hash << shift3)
+            hash = (hash << shift1) | (hash >> shift2) &+ (hash << shift3)
             
             // This part left-shifts the bits by shift1, then uses an AND gate with the right shift of the hash, then combines it with an OR of the left-shift of shift3, then XORs it with the right-shift of the hash by shift4
             hash = (hash << shift1) & (hash >> shift2) | (hash << shift3) ^ (hash >> shift4)
             
             // This part left shifts the hash by shift1, XORs the result by the right shift of shift2, then multiplies it by the left shift of the hash by shift3
-            hash = (hash << shift1) ^ (hash >> shift2) * (hash << shift3)
+            hash = (hash << shift1) ^ (hash >> shift2) &* (hash << shift3)
             
             // This part left shifts the hash by shift1, XORs the result by the right shift of shift2, then multiplies it by the left shift of the hash by shift3
-            hash = (hash << shift1) ^ (hash >> shift2) * (hash << shift3)
+            hash = (hash << shift1) ^ (hash >> shift2) &* (hash << shift3)
         }
         else if hash >= 0xCCCCCCC8 && hash <= 0x6666661 {
             // This part left shifts the hash by shift1, XORs the result by the right shift of shift2, then multiplies it by the left shift of the hash by shift3
@@ -202,7 +202,7 @@ func PassHash(_ input: String) -> UInt32 {
             hash = (hash << shift1) & (hash << shift2) + (hash >> shift3)
             
             // This part left-shifts the hash by shift1, then multiplies it with the right shift by shift2. Because of the mathematical order of execution, the left-shift by shift3 is finally added
-            hash = (hash << shift1) * (hash >> shift2) + (hash << shift3)
+            hash = (hash << shift1) &* (hash >> shift2) + (hash << shift3)
             
             // This part left-shifts the bits by shift1, then uses an AND gate with the right shift of the hash, then combines it with an OR of the left-shift of shift3, then XORs it with the right-shift of the hash by shift4
             hash = (hash << shift1) & (hash >> shift2) | (hash << shift3) ^ (hash >> shift4)
@@ -380,12 +380,17 @@ func OnboardingInitialiser(Name: String, Password: String) -> Int {
         // This section finds the user's home directory and creates a new subpath called PassGuard
         let passGuardPath = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             .appendingPathComponent("PassGuard")
-
-        // This creates the PassGuard folder to store the database in
-        try FileManager.default.createDirectory(at: passGuardPath, withIntermediateDirectories: true, attributes: nil)
-
+        
         // This adds PassGuardDatabase.sqlite3 onto the end of the path, which allows a database to be created here
         let dbPath = passGuardPath.appendingPathComponent("PassGuardDatabase.sqlite3")
+        
+        // This checks if the directory already exists, and fails safe with an error code
+        if FileManager.default.fileExists(atPath: dbPath.path) {
+            return 0
+        }
+        
+        // This creates the PassGuard folder to store the database in
+        try FileManager.default.createDirectory(at: passGuardPath, withIntermediateDirectories: true, attributes: nil)
 
         // This connects to that database file
         let db = try Connection(dbPath.path)
