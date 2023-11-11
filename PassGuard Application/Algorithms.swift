@@ -327,9 +327,11 @@ func PasswordGenerator(Type: Int, Complexity: Int) -> String {
     // This section declares the Password string
     var password = ""
     
-    // This section is the array of random words to use when generating a password
+    // This section is the array of random words to use when generating a password, and the characters to use
     let wordDictionary = ["apple", "banana", "chocolate", "dolphin", "elephant", "firefly", "giraffe", "happiness", "icecream", "jazz", "kiwi", "lighthouse", "mango", "notebook", "ocean", "parrot", "quasar", "rainbow", "sunset", "tiger", "umbrella", "violin", "waterfall", "xylophone", "yellow", "zebra", "astronomy", "butterfly", "carousel", "daffodil", "eagle", "flamingo", "guitar", "harmony", "island", "jupiter", "koala", "lullaby", "moonlight", "nutmeg", "octopus", "penguin", "quilt", "rattlesnake", "sunflower", "trampoline", "unity", "vibrant", "whisper", "xylograph", "yoga", "zephyr", "acoustic", "blossom", "cinnamon", "dreamcatcher", "enigma", "fantasy", "gondola", "hologram", "inspiration", "journey", "kaleidoscope", "labyrinth", "mermaid", "nirvana", "orchid", "pyramid", "quasar", "rhapsody", "sapphire", "tornado", "utopia", "volcano", "wilderness", "xanadu", "yearning", "zenith", "alchemy", "bliss", "crescendo", "divinity", "effervescence", "fandango", "galaxy", "halcyon", "illumination", "jubilee", "kismet", "luminescence", "mellifluous", "nirvana", "opulence", "panorama", "quintessence", "radiance", "serendipity", "tranquility", "utopia", "vivacity", "wanderlust", "xenial", "yearning", "zenith", "abundance", "blissful", "catalyst", "delightful", "ephemeral", "felicity", "gratitude", "harmonious", "inspiration", "jubilant", "kaleidoscopic", "luminous", "magnificent", "nurturing", "optimistic", "pacific", "quixotic", "radiant", "serene", "tranquil", "uplifting", "vibrant", "whimsical", "xanadu", "youthful", "zealous", "alluring", "breathtaking", "captivating", "dazzling", "enchanting", "fascinating", "gorgeous", "hypnotic", "intriguing", "jovial", "kaleidoscopic", "luscious", "mesmerizing", "nurturing", "opulent", "picturesque", "quaint", "resplendent", "scintillating", "tantalizing", "unforgettable", "voluptuous", "winsome", "exquisite", "youthful", "zesty", "affectionate", "brilliant", "charming", "daring", "ethereal", "fearless", "graceful", "honest", "innovative", "joyful", "kindhearted", "loyal", "magnanimous", "noble", "optimistic", "passionate", "quiet", "resilient", "sincere", "tenacious", "uplifting", "versatile", "witty", "xenial", "yielding", "zealous", "adventurous", "bold", "creative", "determined", "enthusiastic", "fearless", "gregarious", "hopeful", "intelligent", "jovial", "kind", "lively", "motivated", "nonchalant", "open-minded", "playful", "quirky", "resilient", "sociable", "thoughtful", "unbiased", "vibrant", "warmhearted", "xenial", "youthful", "zesty", "amazing", "brilliant", "charismatic", "dazzling", "effervescent", "flawless", "graceful", "heartwarming", "inspiring", "jubilant", "kaleidoscopic", "luminous", "mesmerizing", "nurturing", "optimistic", "passionate", "quixotic", "radiant", "serene", "tenacious", "uplifting", "vivacious", "winsome", "xenial", "yearning", "zealous", "abundant", "blissful", "candid", "delightful", "effervescent", "fanciful", "grateful", "harmonious", "innocent", "joyful", "kaleidoscopic", "lighthearted", "mirthful", "naive", "optimistic", "playful", "quaint", "radiant", "serendipitous", "tranquil", "unassuming", "vibrant", "whimsical", "xenial", "youthful", "zealous", "apple", "banana", "chocolate", "dolphin", "elephant", "firefly", "giraffe", "happiness", "icecream", "jazz"]
-
+    // This section allows the character dictionary to switch between special and standard depending on type
+    let characters = (Type == 3) ? "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-=_+[]{}|;:'\",.<>/?": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    
     // This chooses a random word from the dictionary
     func PasswordGeneratorGenerateWord() -> String {
         let randomIndex = Int(arc4random_uniform(UInt32(wordDictionary.count)))
@@ -338,7 +340,6 @@ func PasswordGenerator(Type: Int, Complexity: Int) -> String {
 
     // This chooses a random character in the string
     func PasswordGeneratorGenerateCharacter() -> Character {
-        let characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
         let randomIndex = Int(arc4random_uniform(UInt32(characters.count)))
         return characters[characters.index(characters.startIndex, offsetBy: randomIndex)]
     }
@@ -354,9 +355,6 @@ func PasswordGenerator(Type: Int, Complexity: Int) -> String {
         password = String(password.dropLast())
         
     } else if Type == 2 || Type == 3 {
-        
-        // If the selected option is Type 3 which includes special characters, then the random selection will include special characters
-        let charactersToUse = (Type == 3) ? "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" : "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-=_+[]{}|;:'\",.<>/?"
         
         // This part will make sure that an extra random selection is added until it reaches the length passed through as Complexity
         for _ in 1...Complexity {
