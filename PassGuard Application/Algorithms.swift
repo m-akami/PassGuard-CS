@@ -2,6 +2,7 @@
 These are required for PassGuard to function correctly and are not programmed by me. They are external tools used to make development easier. */
 
 import SwiftUI
+import SQLite
 
 /* Password Complexity
 When a user enters a password into PassGuard’s database, this algorithm should run to check for complexity and tag potentially weaker credentials that should be replaced.*/
@@ -363,4 +364,81 @@ func PasswordGenerator(Type: Int, Complexity: Int) -> String {
     }
 
     return password
+}
+
+/* PassGuard Onboarding Initialiser - OnboardingInitialiser
+An algorithm that initialises the application with all the user's data, and creates the relevant dependencies. If the system initialisation fails, then the system will return 0, if it succeeds then 1 is returned.*/
+
+func OnboardingInitialiser(Name: String, Password: String) -> Int {
+    
+    let hashedPassword = String(PassHash(Password))
+    
+    // This section initialises the database with the computed values
+    
+    do {
+        
+        // This section finds the user's home directory and creates a new subpath called PassGuard
+        let passGuardPath = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            .appendingPathComponent("PassGuard")
+
+        // This creates the PassGuard folder to store the database in
+        try FileManager.default.createDirectory(at: passGuardPath, withIntermediateDirectories: true, attributes: nil)
+
+        // This adds PassGuardDatabase.sqlite3 onto the end of the path, which allows a database to be created here
+        let dbPath = passGuardPath.appendingPathComponent("PassGuardDatabase.sqlite3")
+
+        // This connects to that database file
+        let db = try Connection(dbPath.path)
+
+        // The CredentialTable is created here
+        try db.run("""
+            CREATE TABLE IF NOT EXISTS CredentialTable (
+                ObjectID INTEGER PRIMARY KEY,
+                DateAccessed DATETIME,
+                Tag TEXT,
+                ObjectType TEXT CHECK (ObjectType IN ('Card', 'Note', 'Password')),
+                Username TEXT,
+                Password TEXT,
+                Webpage TEXT,
+                CardNumber TEXT,
+                Expiry TEXT,
+                CVV TEXT,
+                Notes TEXT
+            )
+        """)
+
+        // The TrashTable is created here
+        try db.run("""
+            CREATE TABLE IF NOT EXISTS TrashTable (
+                ObjectID INTEGER PRIMARY KEY,
+                TrashedDate DATETIME,
+                FOREIGN KEY (ObjectID) REFERENCES CredentialTable(ObjectID)
+            )
+        """)
+
+        // The SecurityTable is created here
+        try db.run("""
+            CREATE TABLE IF NOT EXISTS SecurityTable (
+                ObjectID INTEGER PRIMARY KEY,
+                Complexity INTEGER,
+                Compromised INTEGER CHECK (Compromised IN (0, 1)),
+                FOREIGN KEY (ObjectID) REFERENCES CredentialTable(ObjectID)
+            )
+        """)
+
+        // The AccountTable is created here
+        try db.run("""
+            CREATE TABLE IF NOT EXISTS AccountTable (
+                Name TEXT PRIMARY KEY,
+                Password TEXT
+            )
+        """)
+
+        // This inserts the passed through values into the AccountTable
+        try db.run("INSERT OR REPLACE INTO AccountTable (Name, Password) VALUES (?, ?)", Name, hashedPassword)
+        return 1
+    } catch {
+        print("Error: \(error)")
+        return 0
+    }
 }
