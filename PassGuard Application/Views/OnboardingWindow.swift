@@ -22,6 +22,7 @@ struct OnboardingWindow: View {
     @State private var isFullNameEmpty = false
     @State private var isPasswordEmpty = true
     @State private var isConfirmPasswordEmpty = true
+    @State private var isPasswordComplex = false
     @State private var onboardingOK = false
     let inputBoxColor = Color(red: 72 / 255, green: 74 / 255, blue: 78 / 255)
     
@@ -193,9 +194,10 @@ struct OnboardingWindow: View {
                     
                     // This section validates the user's inputs
                     isFullNameEmpty = fullName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    isPasswordComplex = minimumComplexity(Password: masterPassword)
                     
                     // This section continues if there are no problems
-                    let onboardingOK = !isFullNameEmpty && passwordsMatch() && !isPasswordEmpty && !isConfirmPasswordEmpty
+                    let onboardingOK = !isFullNameEmpty && passwordsMatch() && !isPasswordEmpty && !isConfirmPasswordEmpty && isPasswordComplex
                     
                     if onboardingOK == true {
                         if OnboardingInitialiser(Name: fullName, Password: masterPassword) == 1 {
@@ -205,6 +207,10 @@ struct OnboardingWindow: View {
                             self.alertType = .onboardingError
                             self.showingAlert = true
                         }
+                    }
+                    else if onboardingOK == false && isPasswordComplex == false {
+                        self.alertType = .complexityError
+                        self.showingAlert = true
                     }
                     else if onboardingOK == false {
                         self.alertType = .inputError
@@ -243,6 +249,15 @@ struct OnboardingWindow: View {
                                 }
                             )
                         
+                        case .complexityError:
+                            return Alert(
+                                title: Text("Error"),
+                                message: Text("Your Master Password must be at least 4 characters. Please increase the length and try again."),
+                                dismissButton: .default(Text("OK")) {
+                                    self.OnboardingInitialiserError = false
+                                }
+                            )
+                        
                         case .none:
                                 return Alert(title: Text("No Error"))
                             }
@@ -268,11 +283,20 @@ struct OnboardingWindow: View {
         return masterPassword == confirmMasterPassword
     }
     
+    func minimumComplexity(Password: String) -> Bool {
+        if Password.count >= 4 {
+            return true
+        } else {
+            return false
+        }
+    }
+    
     // Local Algorithms - Alert Logic
     
     enum AlertType {
         case inputError
         case onboardingError
+        case complexityError
     }
 }
 
