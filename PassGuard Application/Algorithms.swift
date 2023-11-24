@@ -3,6 +3,8 @@ These are required for PassGuard to function correctly and are not programmed by
 
 import SwiftUI
 import SQLite
+import Foundation
+import BigInt
 
 /* Password Complexity
 When a user enters a password into PassGuard’s database, this algorithm should run to check for complexity and tag potentially weaker credentials that should be replaced.*/
@@ -62,6 +64,14 @@ func PasswordComplexityColour(_ masterPassword: String) -> Color {
 
 /* PassGuard Cryptography
 Multiple modules that are responsible for the protection of data have been created here, as a proof-of-concept, rather than using CryptoKit.*/
+
+func PassCryptEncrypt(Data: String, Password: String) -> String {
+    return "Error"
+}
+
+func PassCryptDecrypt(Data: String, Password: String) -> String {
+    return "Error"
+}
 
 /* PassGuard Hashing - PassHash
 A proof-of-concept hashing algorithm designed to obfuscate data during operations, one way.*/
@@ -245,6 +255,27 @@ func PassHash(_ input: String) -> UInt32 {
 
 /* PassGuard Encrypt - PassCrypt
 A proof-of-concept encryption algorithm designed to obfuscate data stored in the master table.*/
+
+func PassCrypt(Data: String, Password: String, Mode: String) -> String {
+    
+    // This section initialises prime numbers to produce secure and reversible transformations that can be combined with the five round keys generated
+        
+    let prime1: BigInt = 15485863
+    let prime2: BigInt = 982451653
+    let prime3: BigInt = 314159
+    let prime4: BigInt = 2718281829
+    let prime5: BigInt = 7154629
+    
+    // This section declases the five round keys, and sets them all to an encoded version of the password
+        
+    let key1: BigInt = 0
+    let key2: BigInt = 0
+    let key3: BigInt = 0
+    let key4: BigInt = 0
+    let key5: BigInt = 0
+
+    return "PassGuard Internal Error"
+}
 
 /* Comprimised Account Notifications - SecurityCheck
 An algorithm powered by the HIBP API to return the sites which have the breached account in*/
@@ -443,7 +474,7 @@ func OnboardingInitialiser(Name: String, Password: String) -> Int {
         try db.run("INSERT OR REPLACE INTO AccountTable (Name, Password) VALUES (?, ?)", Name, hashedPassword)
         return 1
     } catch {
-        print("Error: \(error)")
+        print("PassGuard Internal Error: \(error)")
         return 0
     }
 }
@@ -480,7 +511,7 @@ func ValidateCredentials(Password: String) -> Bool {
         }
         
     } catch {
-        print("Error: \(error)")
+        print("PassGuard Internal Error: \(error)")
         return false
     }
     
@@ -505,7 +536,7 @@ func AccountExists() -> Bool {
             return false
         }
     } catch {
-        print("Error")
+        print("PassGuard Internal Error")
         return false
     }
 }
@@ -531,7 +562,44 @@ func DeleteAccount() -> Bool {
             return true
         }
     } catch {
-        print("Error")
+        print("PassGuard Internal Error")
         return false
     }
+}
+
+func GetUsername() -> String {
+    
+    let accountTable = Table("AccountTable")
+    @State var nameColumn = Expression<String>("Name")
+    
+    do {
+    
+        // This section finds the user's home directory
+        let passGuardPath = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            .appendingPathComponent("PassGuard")
+        
+        // This adds PassGuardDatabase.sqlite3 onto the end of the path, which allows a database to be created here
+        let dbPath = passGuardPath.appendingPathComponent("PassGuardDatabase.sqlite3")
+        
+        // This connects to that database file
+        let db = try Connection(dbPath.path)
+        
+        // This gets the first record in the table
+        if let firstAccount = try db.pluck(accountTable) {
+            let username = try firstAccount.get(nameColumn)
+        
+        // This returns the username
+        return username
+        }
+        
+    } catch {
+        return "PassGuard Internal Error: \(error)"
+    }
+    
+    return "PassGuard Internal Error"
+}
+
+func UnlockPassGuard() -> Bool {
+    // not finished yet
+    return true
 }
