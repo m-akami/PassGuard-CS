@@ -4,12 +4,12 @@ PassGuard-CS is a proof-of-concept Password Manager application built using Swif
 ## Images
 
 <div>
-  <p>OnboardingWindow.swift</p>
+  <p><strong>OnboardingWindow.swift</strong></p>
   <img width="300" alt="LoginWindow.swift" src="https://github.com/m-akami/PassGuard-CS/assets/123811425/31e4f644-6c19-4946-b59b-7952ad90dfc6">
 </div>
 
 <div>
-  <p>LoginWindow.swift</p>
+  <p><strong>LoginWindow.swift</strong></p>
   <img width="300" alt="redacted" src="https://github.com/m-akami/PassGuard-CS/assets/123811425/0f98f227-4dad-43b1-a184-72258778af17">
 </div>
 
