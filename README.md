@@ -1,5 +1,5 @@
 # PassGuard-CS
-PassGuard-CS is a proof-of-concept Password Manager application built using SwiftUI and SwiftData. This implementation is designed for educational purposes and may not provide the same level of security as professional-grade password managers as it is part of my assignment, aimed at exploring the logic behind algorithms and expanding my personal knowledge of SwiftUI.
+PassGuard-CS is a proof-of-concept Password Manager application built using SwiftUI and SQLite.swift. This implementation is designed for educational purposes and may not provide the same level of security as professional-grade password managers as it is part of my assignment, aimed at exploring the logic behind algorithms and expanding my personal knowledge of SwiftUI.
 
 ## Images
 
@@ -14,7 +14,6 @@ PassGuard-CS is a proof-of-concept Password Manager application built using Swif
 </div>
 
 ## Features
-PassGuard is a feature rich application that manages a range of data.
 - Simple UI: The PassGuard user interface is designed to be modern and simple.
 - Information Grouping: Credentials of the same type are grouped together.
 - Responsive Design: PassGuard is able to scale to multiple display sizes.
@@ -26,13 +25,10 @@ PassGuard is a feature rich application that manages a range of data.
 - Inactivity Notifications: If a credential has not been used in a while, PassGuard will reccomend that the online account be deleted.
 
 ## Security Considerations
-While PassGuard-CS is a functional prototype, you must acknowledge its limitations, especially around security:
-- Encryption Level: The encryption and security mechanisms implemented in this assignment may not be secure, as they have been created by me.
-- Security Auditing: PassGuard-CS has not undergone a comprehensive security audit, which is important for mitigating vulnerabilities.
-- Safe Usage: Be cautious when using PassGuard-CS to store sensitive information, as it may not be reliable.
+I have personally designed the security backend for this application: PassCrypt and PassHash, used for encryption and hashing respectively, to protect items stored in this app. As this is an educational project, I have no baseline to judge on how secure and how reliable my code is, so production usage would be discouraged.
 
 ## Project Purpose
-The primary purpose of PassGuard-CS is to serve as a practical assignment for educational purposes. I have tried to include multiple concepts in this app, and have open-sourced it as others may be able to learn from it. I have used the following concepts in this project:
+I have tried to include multiple concepts in this app, and have open-sourced it as others may be able to learn from it. I have used the following concepts in this project:
 - User Interface Design with SwiftUI
 - Data Storage and Retrieval with SQLite and SwiftData for secret management
 - Password Strength Evaluation
