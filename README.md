@@ -13,6 +13,11 @@ PassGuard-CS is a proof-of-concept Password Manager application built using Swif
   <img width="300" alt="redacted" src="https://github.com/m-akami/PassGuard-CS/assets/123811425/0f98f227-4dad-43b1-a184-72258778af17">
 </div>
 
+## Honourable Mentions
+Even though this is a small project for educational purposes, I believe the people that (indirectly) contributed to this project must be mentioned.
+SQLite.swift - Massive thanks to everyone building SQLite.swift, couldn't have done most of the database operations easily without this wrapper (https://github.com/stephencelis/SQLite.swift)
+Swift - The language that powers this application. Also really nice to program in, thanks Apple! (https://github.com/apple/swift)
+
 ## Features
 - Simple UI: The PassGuard user interface is designed to be modern and simple.
 - Information Grouping: Credentials of the same type are grouped together.
