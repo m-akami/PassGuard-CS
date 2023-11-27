@@ -4,7 +4,6 @@ These are required for PassGuard to function correctly and are not programmed by
 import SwiftUI
 import SQLite
 import Foundation
-import BigInt
 
 /* Password Complexity
 When a user enters a password into PassGuard’s database, this algorithm should run to check for complexity and tag potentially weaker credentials that should be replaced.*/
@@ -241,6 +240,45 @@ func PassHash(_ input: String) -> UInt32 {
         hash = (hash << shift3) &+ (hash << shift4) &- (hash << shift5)
     }
     
+    // This part makes sure that the hash value doesn't equal zero, and if it does, the original data is retrieved and a subset of functions
+    if hash == 0 {
+        
+        // It converts the input to UTF, so the characters can be read as numbers.
+        for char in input.utf8 {
+            
+            // safeHash is declared, which starts with a prime addition to prevent a null return
+            var safeHash: UInt32 = 0
+            
+            // Multiple prime numbers are initialised to use as hashes, as they are only divisable by one and themselves, which makes reverse-engineering more difficult.
+            let prime1: UInt32 = 15485863
+            let prime2: UInt32 = 982451653
+            let prime3: UInt32 = 314159
+            let prime4: UInt32 = 2718281829
+
+            // Multiple shift operations are used, using the AND operator so they don't overflow 32 bits.
+            let shift1 = 2 * (hash & 0x0F)
+            let shift2 = 3 * (hash & 0x1F)
+            let shift3 = 5 * (hash & 0x3F)
+            let shift4 = 7 * (hash & 0x7F)
+            let shift5 = 11 * (hash & 0xFF)
+            
+            // The fifth prime number (7154629) is added then the input is combined with the current character value in 32 bits.
+            safeHash = (safeHash + 7154629) &+ UInt32(char)
+            
+            // This part left-shifts the bits by shift one, and then right-shifts the bits by shift two, then an AND operator is used with overflow protection.
+            safeHash = (safeHash << shift1) &+ (safeHash >> shift2)
+            
+            // This part XORs it with the 1st prime number, then multiplies by the second.
+            safeHash = (safeHash ^ prime1) &* prime2
+            
+            // Then this part XORs it with the third prime number and subtracts the fourth.
+            safeHash = (hash ^ prime3) &- prime4
+            
+            // The hash gets outputted as a numerical value instead of the null hash.
+            return safeHash
+        }
+    }
+        
     // The hash gets outputted as a numerical value.
     return hash
 }
@@ -248,25 +286,85 @@ func PassHash(_ input: String) -> UInt32 {
 /* PassGuard Encrypt - PassCrypt
 A proof-of-concept encryption algorithm designed to obfuscate data stored in the master table.*/
 
-func PassCrypt(Data: String, Password: String, Mode: String) -> String {
+func PassCrypt(Data: String, Password: String, Mode: Bool) -> String {
+    
+    /* Variables
+     This section of code declares variables and some immutable values to be used in encryption handling, such as values used for XOR constants that will be used in key expansion.*/
+    
+    // This will store the current encryption state
+    
+    var state: Int = 0
     
     // This section initialises prime numbers to produce secure and reversible transformations that can be combined with the five round keys generated
-        
-    let prime1: BigInt = 15485863
-    let prime2: BigInt = 982451653
-    let prime3: BigInt = 314159
-    let prime4: BigInt = 2718281829
-    let prime5: BigInt = 7154629
     
-    // This section declases the five round keys, and sets them all to an encoded version of the password
-        
-    let key1: BigInt = 0
-    let key2: BigInt = 0
-    let key3: BigInt = 0
-    let key4: BigInt = 0
-    let key5: BigInt = 0
+    let prime1: Int = 15485863
+    let prime2: Int = 982451653
+    let prime3: Int = 314159
+    let prime4: Int = 2718281829
+    let prime5: Int = 7154629
+    
+    // This section declases the five round keys, and sets them all to zero, later replaced with an encoded version of the password
+    
+    var key1: Int = 0
+    var key2: Int = 0
+    var key3: Int = 0
+    var key4: Int = 0
+    var key5: Int = 0
+    
+    // This section declares the shifting box arrays and the inverse shifts
+    
+    /* Operations
+     This section performs operations to encrypt and decrypt the inputted data, along with safely encoding the bytes.*/
+    
+    // This section sets the state to an encoded version of the data string
+    
+    state = encodeString(text: Data)
+    
+    // keys should be set to the encoded string value
+    
+    // Data should be encoded to a BigInt Value
+    
+    // IF mode is true, perform enctryption steps
+    
+    // ELSE perform inverse functions like revsbox etc
+    
+    /* Functions
+     This section outlines Rijndael style operations to be carried out on data.*/
+    
+    /* Inverse Functions
+     This section outlines Rijndael style inverse operations to be carried out on data.*/
+    
+    /* Data Processing
+     This section outlines Unicode data processing algorithms to allow the conversion between string and integer.*/
+    
+    // This section encodes strings
+    
+    func encodeString(text: String) -> Int {
+        let encodedArray = text.unicodeScalars.map { Int($0.value) }
+        let combinedValue = encodedArray.reduce(0) { result, value in
+            return result * 10 + value // Adjust the base as needed
+        }
+        return combinedValue
+    }
+    
+    // This section decodes integers
+    
+    func decodeString(encoded: Int) -> String {
+        var remainingValue = Int(encoded)
+        var decodedArray: [Int] = []
 
-    return "PassGuard Internal Error"
+        while remainingValue > 0 {
+            let digit = remainingValue % 10
+            decodedArray.insert(digit, at: 0)
+            remainingValue /= 10
+        }
+
+        let characters = decodedArray.map { UnicodeScalar($0 + 48)! }
+        return String(String.UnicodeScalarView(characters))
+    }
+    
+    let output = decodeString(encoded: state)
+    return output
 }
 
 /* Comprimised Account Notifications - SecurityCheck
@@ -453,9 +551,20 @@ func OnboardingInitialiser(Name: String, Password: String) -> Int {
                 FOREIGN KEY (ObjectID) REFERENCES CredentialTable(ObjectID)
             )
         """)
+        
+        // This adds Account.sqlite3 onto the end of the path, which allows a database to be created here
+        let accountPath = passGuardPath.appendingPathComponent("Account.sqlite3")
+        
+        // This checks if the directory already exists, and fails safe with an error code
+        if FileManager.default.fileExists(atPath: accountPath.path) {
+            return 0
+        }
+
+        // This connects to that database file
+        let account = try Connection(accountPath.path)
 
         // The AccountTable is created here
-        try db.run("""
+        try account.run("""
             CREATE TABLE IF NOT EXISTS AccountTable (
                 Name TEXT PRIMARY KEY,
                 Password TEXT
@@ -463,7 +572,7 @@ func OnboardingInitialiser(Name: String, Password: String) -> Int {
         """)
 
         // This inserts the passed through values into the AccountTable
-        try db.run("INSERT OR REPLACE INTO AccountTable (Name, Password) VALUES (?, ?)", Name, hashedPassword)
+        try account.run("INSERT OR REPLACE INTO AccountTable (Name, Password) VALUES (?, ?)", Name, hashedPassword)
         return 1
     } catch {
         print("PassGuard Internal Error: \(error)")
@@ -485,7 +594,7 @@ func ValidateCredentials(Password: String) -> Bool {
             .appendingPathComponent("PassGuard")
         
         // This adds PassGuardDatabase.sqlite3 onto the end of the path, which allows a database to be created here
-        let dbPath = passGuardPath.appendingPathComponent("PassGuardDatabase.sqlite3")
+        let dbPath = passGuardPath.appendingPathComponent("Account.sqlite3")
         
         // This connects to that database file
         let db = try Connection(dbPath.path)
@@ -518,7 +627,7 @@ func AccountExists() -> Bool {
             .appendingPathComponent("PassGuard")
         
         // This adds PassGuardDatabase.sqlite3 onto the end of the path, which allows the database file to be found
-        let dbPath = passGuardPath.appendingPathComponent("PassGuardDatabase.sqlite3")
+        let dbPath = passGuardPath.appendingPathComponent("Account.sqlite3")
         
         // This checks if a file is found at the location, if it is it's returned as true, else false
         if FileManager.default.fileExists(atPath: dbPath.path) {
@@ -542,12 +651,18 @@ func DeleteAccount() -> Bool {
         
         // This adds PassGuardDatabase.sqlite3 onto the end of the path, which allows the database file to be found
         let dbPath = passGuardPath.appendingPathComponent("PassGuardDatabase.sqlite3")
+        let accountPath = passGuardPath.appendingPathComponent("Account.sqlite3")
         
         // This section deletes the database
         try FileManager.default.removeItem(at: dbPath)
+        try FileManager.default.removeItem(at: accountPath)
         
         // This checks if the database still exists, if it does false is returned, if not true is returned
         if FileManager.default.fileExists(atPath: dbPath.path) {
+            return false
+        }
+        // This checks if the account still exists, if it does false is returned, if not true is returned
+        else if FileManager.default.fileExists(atPath: accountPath.path) {
             return false
         }
         else {
@@ -571,7 +686,7 @@ func GetUsername() -> String {
             .appendingPathComponent("PassGuard")
         
         // This adds PassGuardDatabase.sqlite3 onto the end of the path, which allows a database to be created here
-        let dbPath = passGuardPath.appendingPathComponent("PassGuardDatabase.sqlite3")
+        let dbPath = passGuardPath.appendingPathComponent("Account.sqlite3")
         
         // This connects to that database file
         let db = try Connection(dbPath.path)
