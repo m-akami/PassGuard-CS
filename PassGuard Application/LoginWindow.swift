@@ -190,7 +190,7 @@ struct LoginWindow: View {
 }
 
 /* Launch View
-This is the entry point for PassGuard. If there has not been a registration form completed, this will be the first window to open.*/
+This is where a window is created when the LoginWindow() is called.*/
 
 struct LoginWindowApp: App {
     var body: some Scene {
