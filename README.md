@@ -3,15 +3,15 @@ PassGuard-CS is a proof-of-concept Password Manager application built using Swif
 
 ## Images
 
-<div>
-  <p><strong>OnboardingWindow.swift</strong></p>
-  <img width="300" alt="LoginWindow.swift" src="https://github.com/m-akami/PassGuard-CS/assets/123811425/31e4f644-6c19-4946-b59b-7952ad90dfc6">
-</div>
+<img width="602" alt="Screenshot 2024-03-14 at 12 09 50" src="https://github.com/m-akami/PassGuard-CS/assets/123811425/f3c40de8-510a-42c0-8e69-cc79db1a4b4b">
 
-<div>
-  <p><strong>LoginWindow.swift</strong></p>
-  <img width="300" alt="redacted" src="https://github.com/m-akami/PassGuard-CS/assets/123811425/0f98f227-4dad-43b1-a184-72258778af17">
-</div>
+
+<img width="1012" alt="image" src="https://github.com/m-akami/PassGuard-CS/assets/123811425/0bc3157b-1932-4a69-8006-d6632b3aaec1">
+
+<img width="1019" alt="Screenshot 2024-03-14 at 12 10 07" src="https://github.com/m-akami/PassGuard-CS/assets/123811425/5e7683c8-bdd0-426b-ac16-63fedb3cc92d">
+
+<img width="1078" alt="Screenshot 2024-03-14 at 12 13 32" src="https://github.com/m-akami/PassGuard-CS/assets/123811425/f82e5a31-cea7-42fd-bcd3-e8541a811ad1">
+
 
 ## Honourable Mentions
 Even though this is a small project for educational purposes, I believe the people that (indirectly) contributed to this project must be mentioned.
