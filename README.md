@@ -1,5 +1,5 @@
 # PassGuard-CS
-PassGuard-CS is a proof-of-concept Password Manager application built using SwiftUI and SQLite.swift. This implementation is designed for educational purposes and may not provide the same level of security as professional-grade password managers as it is part of my assignment, aimed at exploring the logic behind algorithms and expanding my personal knowledge of SwiftUI.
+PassGuard-CS is a proof-of-concept Password Manager application built using SwiftUI and SQLite.swift. This implementation is designed for educational purposes and may not provide the same level of security as professional-grade password managers as it is part of my A-Level Computer Science assignment, aimed at exploring the logic behind algorithms and expanding my personal knowledge of SwiftUI.
 
 ## Images
 
